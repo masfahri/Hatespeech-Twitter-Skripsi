@@ -7,10 +7,12 @@ package testskripsi;
 
 import static java.awt.SystemColor.text;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.table.DefaultTableModel;
 import static testskripsi.TestSkripsi.conn;
 
 /**
@@ -35,15 +37,33 @@ public class Prepocecing {
         tweet = tweet.replaceAll("[']", "");
         tweet = tweet.replaceAll(" +", " ").trim();
         
-        System.out.println(tweet);
+//        System.out.println(tweet);
         try {
             Statement stmt = conn.createStatement();
+            String qryTweetDummy = "select count(*) as count from tweet_dummy";
+            ResultSet rsTweetDummy = stmt.executeQuery(qryTweetDummy);
+            int numTweetDummy = 0;
+            while(rsTweetDummy.next()){
+                numTweetDummy= (rsTweetDummy.getInt(1));
+            }
+            String qryTweet = "select count(*) as count from tweet";
+            ResultSet rsTweet = stmt.executeQuery(qryTweet);
+            int numTweet = 0;
+            while(rsTweet.next()){
+                numTweet = (rsTweet.getInt(1));
+            }
             
-            stmt.executeUpdate("INSERT into tweet (user_id, tweet, tanggal_tweet, location) VALUES ('" 
-                            + id + "','" 
-                            + tweet + "','" 
-                            + dateTweet + "','" 
-                            + location + "')");
+            if (numTweet == numTweetDummy) {
+                System.out.println(numTweet);
+            }else{
+                stmt.executeUpdate("INSERT into tweet (user_id, tweet, tanggal_tweet, location) VALUES ('" 
+                    + id + "','" 
+                    + tweet + "','" 
+                    + dateTweet + "','" 
+                    + location + "')");
+            }
+
+
 
         }catch(SQLException ex) {
             System.out.println(ex.getMessage());
@@ -51,5 +71,7 @@ public class Prepocecing {
         
         return tweet;
     }
+
+    
 
 }

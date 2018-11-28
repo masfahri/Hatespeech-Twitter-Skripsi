@@ -63,7 +63,7 @@ public class MainView extends javax.swing.JFrame {
         initComponents();
         
         TestSkripsi configApp = new TestSkripsi();
-        setExtendedState(JFrame.MAXIMIZED_HORIZ);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
         setResizable(false);
     }
@@ -108,7 +108,7 @@ public class MainView extends javax.swing.JFrame {
                             + status.getUser().getLocation() + "','" 
                             + status.getLang() + "')");
                     load_tweet();
-                    Thread.sleep(20000);
+                    Thread.sleep(2000);
                     //To change body of generated methods, choose Tools | Templates.
                 } catch (SQLException | InterruptedException ex) {
                     Logger.getLogger(MainView.class.getName()).log(Level.SEVERE, null, ex);
@@ -164,6 +164,80 @@ public class MainView extends javax.swing.JFrame {
         stopStream();
         streamTwitter();
     }
+    
+    public void load_tweet() {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Nomor");
+        model.addColumn("Username");
+        model.addColumn("Tweet");
+        model.addColumn("Tanggal Tweet");
+        model.addColumn("Lokasi Tweet");
+        model.addColumn("Bahasa Tweet");
+        
+        try {
+            Statement stmt = conn.createStatement();
+            String qry = "SELECT * FROM tweet_dummy";
+            ResultSet rs = stmt.executeQuery(qry);
+            while(rs.next()){
+                model.addRow(new Object[]{
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getString(5),
+                    rs.getString(6),
+                    rs.getString(7),
+                    rs.getString(8)
+                });
+            }
+            tweetTabel.setModel(model);
+
+        }catch(Exception e){
+            
+        }
+    }
+    
+    private void prepos() throws SQLException, TwitterException {
+        stopStream();
+        dummyTweet model = new dummyTweet();
+        Statement stmt = conn.createStatement();
+        String qry = "SELECT * FROM tweet_dummy";
+        ResultSet rs = stmt.executeQuery(qry);
+        while(rs.next()){
+            model.setUserId(rs.getString(1));
+            model.setTweet(rs.getString(2));
+            model.setTanggalTweet(rs.getString(3));
+            model.setLocation(rs.getString(4));
+
+            Prepocecing bersih = new Prepocecing();
+            bersih.Bersihkan(rs.getString(2), rs.getString(5), rs.getString(6), rs.getString(7));
+        }
+    }
+    
+    private void loadPrep() {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Nomor");
+        model.addColumn("Username");
+        model.addColumn("Tweet");
+        model.addColumn("Tanggal Tweet");
+        model.addColumn("Lokasi Tweet");
+        try {
+            Statement stmt = conn.createStatement();
+            String qry = "SELECT * FROM tweet";
+            ResultSet rs = stmt.executeQuery(qry);
+            while(rs.next()){
+                model.addRow(new Object[]{
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getString(3),
+                    rs.getString(4),
+                    rs.getString(5)
+                });
+            }
+            PreposTabel.setModel(model);
+
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -196,7 +270,7 @@ public class MainView extends javax.swing.JFrame {
         preposPanel = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        PreposTabel = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -376,7 +450,15 @@ public class MainView extends javax.swing.JFrame {
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(tweetTabel);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
@@ -411,7 +493,7 @@ public class MainView extends javax.swing.JFrame {
 
         jLabel5.setText("Prepocesing");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        PreposTabel.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -422,7 +504,7 @@ public class MainView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable1);
+        jScrollPane2.setViewportView(PreposTabel);
 
         javax.swing.GroupLayout preposPanelLayout = new javax.swing.GroupLayout(preposPanel);
         preposPanel.setLayout(preposPanelLayout);
@@ -526,6 +608,7 @@ public class MainView extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton12ActionPerformed
 
+    /** HOME PANEL */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         
@@ -555,24 +638,15 @@ public class MainView extends javax.swing.JFrame {
         mainPanel.add(preposPanel);
         mainPanel.repaint();
         mainPanel.revalidate();
+        loadPrep();
+    
         
         try {
-            dummyTweet model = new dummyTweet();
-            Statement stmt = conn.createStatement();
-            String qry = "SELECT * FROM tweet_dummy";
-            ResultSet rs = stmt.executeQuery(qry);
-            while(rs.next()){
-                model.setUserId(rs.getString(1));
-                model.setTweet(rs.getString(2));
-                model.setTanggalTweet(rs.getString(3));
-                model.setLocation(rs.getString(4));
-                
-                Prepocecing bersih = new Prepocecing();
-                bersih.Bersihkan(rs.getString(2), rs.getString(5), rs.getString(6), rs.getString(7));
-            }
-
-        }catch(Exception e){
-            
+            prepos();
+        } catch (SQLException ex) {
+            Logger.getLogger(MainView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TwitterException ex) {
+            Logger.getLogger(MainView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton8ActionPerformed
 
@@ -610,38 +684,9 @@ public class MainView extends javax.swing.JFrame {
             }
         });
     }
-    
-    public void load_tweet() {
-        DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("Nomor");
-        model.addColumn("Username");
-        model.addColumn("Tweet");
-        model.addColumn("Tanggal Tweet");
-        model.addColumn("Lokasi Tweet");
-        model.addColumn("Bahasa Tweet");
-        
-        try {
-            Statement stmt = conn.createStatement();
-            String qry = "SELECT * FROM tweet_dummy";
-            ResultSet rs = stmt.executeQuery(qry);
-            while(rs.next()){
-                model.addRow(new Object[]{
-                    rs.getString(1),
-                    rs.getString(2),
-                    rs.getString(5),
-                    rs.getString(6),
-                    rs.getString(7),
-                    rs.getString(8)
-                });
-            }
-            tweetTabel.setModel(model);
-
-        }catch(Exception e){
-            
-        }
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable PreposTabel;
     private javax.swing.JPanel bodyPanel;
     private javax.swing.JPanel homePanel;
     private javax.swing.JButton jButton1;
@@ -658,7 +703,6 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel menuPanel;
     private javax.swing.JPanel preposPanel;
@@ -666,4 +710,8 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JPanel streamPanel;
     public javax.swing.JTable tweetTabel;
     // End of variables declaration//GEN-END:variables
+
+    
+
+    
 }
