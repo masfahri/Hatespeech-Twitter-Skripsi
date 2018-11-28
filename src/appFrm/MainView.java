@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import model.dummyTweet;
+import testskripsi.Prepocecing;
 import testskripsi.TestSkripsi;
 import static testskripsi.TestSkripsi.conn;
 import twitter4j.FilterQuery;
@@ -91,7 +93,10 @@ public class MainView extends javax.swing.JFrame {
                     System.out.println("================================");
                     
                     Date dtTweet = status.getCreatedAt();
-                    java.sql.Date dateTweet = new java.sql.Date(dtTweet.getTime());
+                    java.sql.Date dateTweet = new java.sql.Date(dtTweet.getTime());    
+                    
+//                    Prepocecing bersih = new Prepocecing();
+//                    bersih.Bersihkan(status.getId(), status.getText(), dateTweet, status.getUser().getLocation());
                     
                     Statement stmt = conn.createStatement();
                     stmt.executeUpdate("INSERT into tweet_dummy (id_user, username, nama, tweet, tgl_tweet, location_tweet, language_tweet) VALUES ('" 
@@ -188,6 +193,10 @@ public class MainView extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tweetTabel = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
+        preposPanel = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -325,7 +334,7 @@ public class MainView extends javax.swing.JFrame {
                 .addGroup(homePanelLayout.createSequentialGroup()
                     .addGap(37, 37, 37)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(452, Short.MAX_VALUE)))
+                    .addContainerGap(454, Short.MAX_VALUE)))
         );
 
         mainPanel.add(homePanel, "card4");
@@ -381,7 +390,7 @@ public class MainView extends javax.swing.JFrame {
             streamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(streamPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 781, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(streamPanelLayout.createSequentialGroup()
                 .addGap(46, 46, 46)
@@ -395,10 +404,54 @@ public class MainView extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
 
         mainPanel.add(streamPanel, "card2");
+
+        jLabel5.setText("Prepocesing");
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(jTable1);
+
+        javax.swing.GroupLayout preposPanelLayout = new javax.swing.GroupLayout(preposPanel);
+        preposPanel.setLayout(preposPanelLayout);
+        preposPanelLayout.setHorizontalGroup(
+            preposPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, preposPanelLayout.createSequentialGroup()
+                .addContainerGap(378, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addGap(366, 366, 366))
+            .addGroup(preposPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, preposPanelLayout.createSequentialGroup()
+                    .addContainerGap(17, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 780, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(19, Short.MAX_VALUE)))
+        );
+        preposPanelLayout.setVerticalGroup(
+            preposPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(preposPanelLayout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jLabel5)
+                .addContainerGap(483, Short.MAX_VALUE))
+            .addGroup(preposPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, preposPanelLayout.createSequentialGroup()
+                    .addContainerGap(58, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 445, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(21, Short.MAX_VALUE)))
+        );
+
+        mainPanel.add(preposPanel, "card5");
 
         javax.swing.GroupLayout bodyPanelLayout = new javax.swing.GroupLayout(bodyPanel);
         bodyPanel.setLayout(bodyPanelLayout);
@@ -493,7 +546,34 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        // remove panel
+        mainPanel.removeAll();
+        mainPanel.repaint();
+        mainPanel.revalidate();
         
+        // add panel
+        mainPanel.add(preposPanel);
+        mainPanel.repaint();
+        mainPanel.revalidate();
+        
+        try {
+            dummyTweet model = new dummyTweet();
+            Statement stmt = conn.createStatement();
+            String qry = "SELECT * FROM tweet_dummy";
+            ResultSet rs = stmt.executeQuery(qry);
+            while(rs.next()){
+                model.setUserId(rs.getString(1));
+                model.setTweet(rs.getString(2));
+                model.setTanggalTweet(rs.getString(3));
+                model.setLocation(rs.getString(4));
+                
+                Prepocecing bersih = new Prepocecing();
+                bersih.Bersihkan(rs.getString(2), rs.getString(5), rs.getString(6), rs.getString(7));
+            }
+
+        }catch(Exception e){
+            
+        }
     }//GEN-LAST:event_jButton8ActionPerformed
 
     /**
@@ -575,9 +655,13 @@ public class MainView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JPanel menuPanel;
+    private javax.swing.JPanel preposPanel;
     private javax.swing.JPanel stopWords;
     private javax.swing.JPanel streamPanel;
     public javax.swing.JTable tweetTabel;
