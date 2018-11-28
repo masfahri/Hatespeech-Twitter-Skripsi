@@ -6,7 +6,12 @@
 package appFrm;
 
 import appConfig.ConfigApp;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -488,13 +493,7 @@ public class MainView extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-        PrintWriter f0 = new PrintWriter(new FileWriter("output.txt"));
-
-        for(i=0;i<10;i++)
-        {
-            f0.println("Result "+ i +" : "+ ans);
-        }
-        f0.close();
+        
     }//GEN-LAST:event_jButton8ActionPerformed
 
     /**
@@ -553,7 +552,6 @@ public class MainView extends javax.swing.JFrame {
                     rs.getString(6),
                     rs.getString(7),
                     rs.getString(8)
-                    
                 });
             }
             tweetTabel.setModel(model);
